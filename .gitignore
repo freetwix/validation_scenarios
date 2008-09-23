@@ -1,0 +1,7 @@
+# use glob syntax.
+syntax: glob
+
+# use regexp syntax
+syntax: regexp
+*.sqlite3
+*.log

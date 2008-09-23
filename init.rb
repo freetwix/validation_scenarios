@@ -1,10 +1,11 @@
-require 'validation_scenario'
 require 'scenario'
+require 'active_record_support'
+require 'with'
 
 ActiveRecord::Base.class_eval do
-  include ValidationScenario::ActiveRecordSupport
+  include ValidationScenarios::ActiveRecordSupport
 end
 
 ActionController::Base.class_eval do
-  include ValidationScenario
+  include ValidationScenarios::With
 end

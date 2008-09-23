@@ -1,0 +1,3 @@
+test:
+  adapter: sqlite3
+  dbfile: db/validation_scenario.sqlite3
