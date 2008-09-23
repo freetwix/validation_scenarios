@@ -1,0 +1,15 @@
+= Validation Scenario
+
+This plugin is based on ideas of the http://code.google.com/p/validation-scenarios/ plugin. The name does fit for the problem which is solved with the plugin, so i'm to lazy to find another one (just rubified it).
+
+= Rails Support
+
+The tests are running with the following Rails versions:
+* 2.1.0
+
+much fun with the plugin, any suggestions to:
+freetwix at web dot de
+
+thx
+
+
