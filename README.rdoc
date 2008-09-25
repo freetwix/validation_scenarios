@@ -11,6 +11,36 @@ This plugin wasn't used in a production environment so far. If you encounter any
 The tests are running with the following Rails versions:
 * 2.1.0
 
+= Howto
+
+Define validates_xxx methods on a Model for scenarios. The validation will only occur, if the
+Model is used in a scenario:
+
+  Model:
+    class Event < ActiveRecord::Base
+      validates_presence_of :title
+
+      in_scenario :reviewer do |s|
+         s.validates_presence_of :reviewer_note
+      end
+
+  Controller:
+    class ReviewController < ApplicationController
+      def create
+        @event = Event.new(params[:event])
+        @event.save!
+      end
+
+      def update
+        with_scenario :reviewer do
+          @event.save!
+        end
+      end
+
+The :symbol given to #in_scenario is the identifier for the scenario, which is then activated
+via the #with_scenario block.
+
+
 much fun with the plugin, any suggestions to:
 freetwix at web dot de
 
