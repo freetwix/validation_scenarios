@@ -56,9 +56,8 @@ module ValidationScenarios
       private
 
         ##
-        # this relies heavy on the internals of rails, but i did not find a better solution.
-        # validations are using callbacks and callbacks are mighty giants with much abstractions and
-        # generic under the hut
+        # this relies heavy on the internals of rails, cause validation macros are stored via callbacks
+        # and i did not find a better solution
         #
         def __blend__(*args) #:doc:
           options = args.last || args.push{}
