@@ -4,9 +4,22 @@ require 'rubygems'
 gem 'test-spec', '=0.9'
 require 'test/spec'
 
+RAILS_GEM_VERSION = ENV['RAILS_GEM_VERSION'] || '2.1.1'
+gem 'rails', RAILS_GEM_VERSION
+
+require 'action_pack/version'
 require 'action_controller'
+require 'active_record/version'
 require 'active_record'
+require 'active_support/version'
 require 'active_support'
+
+puts <<-OLLA
+  testing for rails-#{RAILS_GEM_VERSION} 
+    - action_controller (action_pack-#{ActionPack::VERSION::STRING})
+    - active_record-#{ActiveRecord::VERSION::STRING}
+    - active_support-#{ActiveSupport::VERSION::STRING}
+OLLA
 
 RAILS_ROOT = File.dirname(__FILE__)
 config = YAML::load(IO.read(File.dirname(__FILE__) + '/config/database.yml'))

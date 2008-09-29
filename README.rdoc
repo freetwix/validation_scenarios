@@ -1,15 +1,18 @@
 = Validation Scenario
 
-This plugin is based on ideas of the http://code.google.com/p/validation-scenarios/ plugin. The name does fit for the problem which is solved with the plugin, so i'm to lazy to find another one (just rubified it).
+This plugin is based on ideas of the http://code.google.com/p/validation-scenarios/ plugin. The name does fit for the problem which is solved with the plugin, so i'm to lazy to find another one (just rubified it and asking for re-usage of the name).
 
-= Version
-
-This plugin wasn't used in a production environment so far. If you encounter any problems, feel free to contact me.
 
 = Rails Support
 
 The tests are running with the following Rails versions:
 * 2.1.0
+* 2.1.1
+
+You may run the test suite with the RAILS_GEM_VERSION environment variable set to a valid Rails::VERSION, like
+  
+  RAILS_GEM_VERSION=2.1 rake test
+
 
 = Howto
 
