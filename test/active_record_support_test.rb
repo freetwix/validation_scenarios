@@ -2,9 +2,11 @@ require File.dirname(__FILE__) +  '/test_helper'
 
 class Event < ActiveRecord::Base
   attr_accessor :bar, :foo, :dude
-
-  validates_presence_of :title
-
+  
+  in_scenario :disable_title do |me|
+    me.validates_presence_of :title, :disable_for_scenario => true
+  end
+  
   in_scenario :description_required do |me|
     me.validates_length_of :description, :in => 10..2000
   end
@@ -27,7 +29,8 @@ class Foo
 end
 
 
-describe "Model with ValidationScenario::ActiveRecordSupport, no :if option" do
+describe "Model with scenarios and an validation with no :if option" do
+
   before do
     @valid_event = Event.new(:title => 'title')
     @foo = Foo.new
@@ -41,19 +44,13 @@ describe "Model with ValidationScenario::ActiveRecordSupport, no :if option" do
     @valid_event.should.be.valid
   end
 
-  it "should not be valid in scenario :description_required" do
+  it "should not be valid in the scenario without description" do
     @foo.with_scenario :description_required do
       @valid_event.should.not.be.valid
     end
   end
 
-  it "should not be valid in scenario :description_required" do
-    @foo.with_scenario :description_required do
-      @valid_event.should.not.be.valid
-    end
-  end
-
-  it "should be valid in scenario :description_required with a description set" do
+  it "should be valid in the scenario with a description" do
     @valid_event.description = 'This is a description'
 
     @foo.with_scenario :description_required do
@@ -61,7 +58,7 @@ describe "Model with ValidationScenario::ActiveRecordSupport, no :if option" do
     end
   end
 
-  it "should not be valid in scenario :description_required with a description set but a mising title" do
+  it "should not be valid in the scenario with a description but a missing title" do
     event = Event.new(:description => 'This is a description')
 
     @foo.with_scenario :description_required do
@@ -69,7 +66,7 @@ describe "Model with ValidationScenario::ActiveRecordSupport, no :if option" do
     end
   end
 
-  it "should be valid again leaving the scenario scope" do
+  it "should be valid again leaving the scenario scope caused by an exception" do
     begin
       @foo.with_scenario :description_required do
         @valid_event.should.not.be.valid
@@ -82,13 +79,14 @@ describe "Model with ValidationScenario::ActiveRecordSupport, no :if option" do
 end
 
 
-describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a proc" do
+describe "Model with scenarios and an validation with :if option as a proc" do
+
   before do
     @valid_event = Event.new(:title => 'title')
     @foo = Foo.new
   end
 
-  it "should be valid in scenario :bar_required_for_title_validation if bar not given" do
+  it "should be valid in the scenario if the validation should not occur" do
     @valid_event.bar = nil
 
     @foo.with_scenario :bar_required_for_title_validation do
@@ -96,7 +94,7 @@ describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a
     end
   end
 
-  it "should not be valid in scenario :bar_required_for_title_validation if bar given" do
+  it "should not be valid in the scenario if the validation should occur" do
     @valid_event.bar = 'bar'
 
     @foo.with_scenario :bar_required_for_title_validation do
@@ -106,13 +104,14 @@ describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a
 end
 
 
-describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a symbol" do
+describe "Model with scenarios and an validation with :if option as a symbol" do
+  
   before do
     @valid_event = Event.new(:title => 'title')
     @foo = Foo.new
   end
 
-  it "should be valid in scenario :foo_required_for_title_validation if foo not given" do
+  it "should be valid in the scenario if the validation should not occur" do
     @valid_event.foo = nil
 
     @foo.with_scenario :foo_required_for_title_validation do
@@ -120,7 +119,7 @@ describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a
     end
   end
 
-  it "should not be valid in scenario :foo_required_for_title_validation if foo given" do
+  it "should not be valid in the scenario if the validation should occur" do
     @valid_event.foo = 'foo'
 
     @foo.with_scenario :foo_required_for_title_validation do
@@ -129,13 +128,15 @@ describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a
   end
 end
 
-describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a string" do
+
+describe "Model with scenarios and an validation with :if option as a string" do
+  
   before do
     @valid_event = Event.new(:title => 'title')
     @foo = Foo.new
   end
 
-  it "should be valid in scenario :dude_required_for_title_validation if dude not given" do
+  it "should be valid in the scenario if the validation should not occur" do
     @valid_event.dude = nil
 
     @foo.with_scenario :dude_required_for_title_validation do
@@ -143,7 +144,7 @@ describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a
     end
   end
 
-  it "should not be valid in scenario :dude_required_for_title_validation if dude given" do
+  it "should not be valid in the scenario if the validation should occur" do
     @valid_event.dude = 'dude'
 
     @foo.with_scenario :dude_required_for_title_validation do
@@ -152,3 +153,21 @@ describe "Model with ValidationScenario::ActiveRecordSupport and :if option as a
   end
 end
 
+
+describe "Model with scenarios and an validation with :disable_for_scenario option" do
+  
+  before do
+    @event = Event.new()
+    @foo = Foo.new
+  end
+
+  it "should not be valid outside the scenario without title" do
+    @event.should.not.be.valid
+  end  
+
+  it "should be valid in the scenario without title" do
+    @foo.with_scenario :disable_title do
+      @event.should.be.valid
+    end
+  end
+end

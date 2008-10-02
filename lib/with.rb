@@ -17,10 +17,10 @@ module ValidationScenarios
     # validations are still working. 
     #
     def with_scenario(args, &block)
-      Thread.current[:with_scenario] = Scenario.new(args)
+      Thread.current[:validation_scenarios_with_scenario] = Scenario.new(args)
       yield
     ensure
-      Thread.current[:with_scenario] = nil
+      Thread.current[:validation_scenarios_with_scenario] = nil
     end
   end
 end

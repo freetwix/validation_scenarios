@@ -17,7 +17,7 @@ module ValidationScenarios
     end
 
     def in_scenario?
-      self == Thread.current[:with_scenario]
+      self == Thread.current[:validation_scenarios_with_scenario]
     end
   end
 end
