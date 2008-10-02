@@ -1,11 +1,11 @@
-= Validation Scenario
+= Validation Scenarios
 
 This plugin is based on ideas of the http://code.google.com/p/validation-scenarios/ plugin. The name does fit for the problem which is solved with the plugin, so i'm to lazy to find another one (just rubified it and asking for re-usage of the name).
 
 
 = Howto
 
-Define validates_xxx methods on a Model for scenarios. The validation will only occur, if the
+Use validates_ methods in a Model in scenarios. The validation will only occur, if the
 Model is used in a scenario:
 
   Model:
