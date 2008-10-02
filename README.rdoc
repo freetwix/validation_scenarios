@@ -3,17 +3,6 @@
 This plugin is based on ideas of the http://code.google.com/p/validation-scenarios/ plugin. The name does fit for the problem which is solved with the plugin, so i'm to lazy to find another one (just rubified it and asking for re-usage of the name).
 
 
-= Rails Support
-
-The tests are running with the following Rails versions:
-* 2.1.0
-* 2.1.1
-
-You may run the test suite with the RAILS_GEM_VERSION environment variable set to a valid Rails::VERSION, like
-  
-  RAILS_GEM_VERSION=2.1 rake test
-
-
 = Howto
 
 Define validates_xxx methods on a Model for scenarios. The validation will only occur, if the
@@ -43,10 +32,32 @@ Model is used in a scenario:
 The :symbol given to #in_scenario is the identifier for the scenario, which is then activated
 via the #with_scenario block.
 
+If you want to exclude a default validation within a scenario, you may do so with the following
+code:
+
+  Model:
+    class Event < ActiveRecord::Base
+      validates_uniqueness_of :title, :unless => Proc.new { in_scenario? :bulk_insert }
+
+      validates_presence_of :description, :unless => Proc.new { in_scenarios? :bulk_insert, :reviewer }
+
+      in_scenario :reviewer do |s|
+        s.validates_presence_of :reviewer_note
+      end
+
+You may have noticed the #in_scenarios? method, which can be used for multiple assignments of
+scenarios.
+
+
+= Rails Support
+
+The tests are running with the following Rails versions:
+* 2.1.0
+* 2.1.1
+
 
 much fun with the plugin, any suggestions to:
 freetwix at web dot de
 
 thx
-
 

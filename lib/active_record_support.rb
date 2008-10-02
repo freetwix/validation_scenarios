@@ -3,7 +3,7 @@ module ValidationScenarios
     def self.included(base)
       base.extend(ClassMethods)
     end
-
+    
     module ClassMethods
       ##
       # Define validates_xxx methods on a Model for scenarios. The validation will only occur, if the
@@ -33,11 +33,41 @@ module ValidationScenarios
       # The :symbol given to #in_scenario is the identifier for the scenario, which is then activated
       # via the #with_scenario block.
       #
+      # If you want to exclude a default validation within a scenario, you may do so with the following
+      # code:
+      #
+      #   Model:
+      #     class Event < ActiveRecord::Base
+      #       validates_uniqueness_of :title, :unless => Proc.new { in_scenario? :bulk_insert }
+      #
+      #       validates_presence_of :description, :unless => Proc.new { in_scenarios? :bulk_insert, :reviewer }
+      #
+      #       in_scenario :reviewer do |s|
+      #         s.validates_presence_of :reviewer_note
+      #       end
+      #
+      # You may have noticed the #in_scenarios? method, which can be used for multiple assignments of
+      # scenarios.
+      # 
       def in_scenario(*args)
         yield(Proxy.new(self, ValidationScenarios::Scenario.new(*args)))
       end
-    end
+      
+      ##
+      # Use in validates_xxx :unless option Procs to disable a default validation in a certain scenario
+      #
+      def in_scenario?(scenario)
+        Scenario.new(scenario).in_scenario?
+      end
 
+      ##
+      # Use in validates_xxx :unless option Procs to disable a default validation for some scenarios
+      #
+      def in_scenarios?(*scenarios)
+        scenarios.find { |scenario| in_scenario?(scenario) } 
+      end
+    end
+    
     ##
     # proxy for the underlying active_record object (here: event) if using validates_xxx methods in the
     # context of an #in_scenario block
@@ -54,31 +84,22 @@ module ValidationScenarios
       end
 
       private
-
-        ##
-        # support for disable a validation for a scenario (and leave it as a validation for 
-        # all other cases)
-        #
-        def __blend__(*args) #:doc:
-          options = args.last || args.push{}
-          expression = (true === options.delete(:disable_for_scenario) ? :unless : :if)
-          __blend_with_expression__(expression, options)
-        end
-
+        
         ##
         # this relies heavy on the internals of rails, cause validation macros are stored via callbacks
         # and i did not find a better solution
-        #        
-        def __blend_with_expression__(expression, options) #:doc:
-          if expression_option = options[expression]
+        def __blend__(*args) #:doc:
+          options = args.last || args.push{}
+          expression = :if
+          if original_option = options[expression]
             options[expression] = Proc.new { |record|
               @scenario.in_scenario? &&
-                ActiveSupport::Callbacks::Callback.new(:kind, :method).__send__(:evaluate_method, expression_option, record)
+                ActiveSupport::Callbacks::Callback.new(:kind, :method).__send__(:evaluate_method, original_option, record)
             }
           else
             options[expression] = Proc.new { @scenario.in_scenario? }
           end
         end
-    end
+    end    
   end
 end

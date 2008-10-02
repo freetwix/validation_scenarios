@@ -3,9 +3,9 @@ require File.dirname(__FILE__) +  '/test_helper'
 class Event < ActiveRecord::Base
   attr_accessor :bar, :foo, :dude
   
-  in_scenario :disable_title do |me|
-    me.validates_presence_of :title, :disable_for_scenario => true
-  end
+  validates_presence_of :title, :unless => Proc.new { in_scenario? :disable_title }
+
+  validates_presence_of :comment, :unless => Proc.new { in_scenarios? :disable_title, :more_disable_title }
   
   in_scenario :description_required do |me|
     me.validates_length_of :description, :in => 10..2000
@@ -32,7 +32,7 @@ end
 describe "Model with scenarios and an validation with no :if option" do
 
   before do
-    @valid_event = Event.new(:title => 'title')
+    @valid_event = create_valid_event
     @foo = Foo.new
   end
 
@@ -82,7 +82,7 @@ end
 describe "Model with scenarios and an validation with :if option as a proc" do
 
   before do
-    @valid_event = Event.new(:title => 'title')
+    @valid_event = create_valid_event
     @foo = Foo.new
   end
 
@@ -107,7 +107,7 @@ end
 describe "Model with scenarios and an validation with :if option as a symbol" do
   
   before do
-    @valid_event = Event.new(:title => 'title')
+    @valid_event = create_valid_event
     @foo = Foo.new
   end
 
@@ -132,7 +132,7 @@ end
 describe "Model with scenarios and an validation with :if option as a string" do
   
   before do
-    @valid_event = Event.new(:title => 'title')
+    @valid_event = create_valid_event
     @foo = Foo.new
   end
 
@@ -154,7 +154,7 @@ describe "Model with scenarios and an validation with :if option as a string" do
 end
 
 
-describe "Model with scenarios and an validation with :disable_for_scenario option" do
+describe "Model with scenarios and an validation skipping in a scenario" do
   
   before do
     @event = Event.new()
@@ -171,3 +171,36 @@ describe "Model with scenarios and an validation with :disable_for_scenario opti
     end
   end
 end
+
+
+describe "Model with scenarios and an validation skipping in some scenarios" do
+  
+  before do
+    @event = Event.new()
+    @foo = Foo.new
+  end
+
+  it "should not be valid outside the scenario without title" do
+    @event.should.not.be.valid
+  end  
+
+  it "should be valid in one scenario without title and comment" do
+    @foo.with_scenario :disable_title do
+      @event.should.be.valid
+    end
+  end
+
+  it "should be valid in another scenario without comment but title" do
+    @event.title = 'dude'
+    @foo.with_scenario :more_disable_title do
+      @event.should.be.valid
+    end
+  end
+end
+
+private
+
+  def create_valid_event
+    Event.new(:title => 'title', :comment => 'dude')  
+  end
+  
