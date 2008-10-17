@@ -4,8 +4,16 @@ require 'rubygems'
 gem 'test-spec', '=0.9'
 require 'test/spec'
 
-RAILS_GEM_VERSION = ENV['RAILS_GEM_VERSION'] || '2.1.1'
-gem 'rails', RAILS_GEM_VERSION
+RAILS_EDGE_PATH = File.join(File.dirname(__FILE__), 'vendor/rails')
+if File.exist?(RAILS_EDGE_PATH)
+  RAILS_GEM_VERSION = 'edge'
+  Dir[File.join(RAILS_EDGE_PATH, '**','lib')].each do |libdir|
+    $LOAD_PATH.unshift libdir
+  end  
+else
+  RAILS_GEM_VERSION = ENV['RAILS_GEM_VERSION'] || '2.1.1'
+  gem 'rails', RAILS_GEM_VERSION  
+end
 
 require 'action_controller'
 require 'active_record'
