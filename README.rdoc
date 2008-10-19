@@ -56,6 +56,10 @@ The tests are running with the following Rails versions:
 * 2.1.1
 * 2.1.0
 
+= License
+
+MIT-License, see MIT-LICENSE file
+
 much fun with the plugin, any suggestions to:
 freetwix at web dot de
 
