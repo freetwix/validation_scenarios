@@ -22,6 +22,10 @@ class Event < ActiveRecord::Base
   in_scenario :dude_required_for_title_validation do |me|
     me.validates_length_of :title, :in => 10..2000, :if => 'dude'
   end
+  
+  in_scenario :without_any_options do |me|
+    me.validates_presence_of :description
+  end
 end
 
 class Foo
@@ -41,6 +45,7 @@ describe "Model with scenarios and an validation with no :if option" do
   end
 
   it "should be valid after instantiation with a title" do
+    @valid_event.valid?
     @valid_event.should.be.valid
   end
 
@@ -73,6 +78,29 @@ describe "Model with scenarios and an validation with no :if option" do
         raise Exception
       end
     rescue Exception
+      @valid_event.should.be.valid
+    end
+  end
+end
+
+
+describe "Model in a scenario and a validation  on description without any further options" do
+
+  before do
+    @valid_event = create_valid_event
+    @foo = Foo.new
+  end
+
+  it "should not be valid if description is missing" do
+    @foo.with_scenario :without_any_options do
+      @valid_event.should.not.be.valid
+    end
+  end
+
+  it "should be valid if description is present" do
+    @valid_event.description = 'found by gzigzigzeo'
+    
+    @foo.with_scenario :without_any_options do
       @valid_event.should.be.valid
     end
   end

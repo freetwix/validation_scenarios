@@ -1,5 +1,6 @@
 # use glob syntax.
 syntax: glob
+test/vendor
 
 # use regexp syntax
 syntax: regexp

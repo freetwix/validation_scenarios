@@ -1,5 +1,6 @@
 module ValidationScenarios
   module ActiveRecordSupport
+
     def self.included(base)
       base.extend(ClassMethods)
     end
@@ -73,32 +74,35 @@ module ValidationScenarios
     # context of an #in_scenario block
     #
     class Proxy < BlankSlate #:doc:
+
       def initialize(model_clazz, scenario)
         @model_clazz = model_clazz
         @scenario    = scenario
       end
 
       def method_missing(m, *args, &block)
-        __blend__(*args) if m.to_s =~ /validates_*/
+        args = __blend__(*args) if m.to_s =~ /validates_*/
         @model_clazz.__send__(m, *args, &block)
       end
 
       private
-        
+
         ##
         # this relies heavy on the internals of rails, cause validation macros are stored via callbacks
         # and i did not find a better solution
         def __blend__(*args) #:doc:
-          options = args.last || args.push{}
-          expression = :if
-          if original_option = options[expression]
-            options[expression] = Proc.new { |record|
+          options = args.last
+          options = args.push({}).last unless options.is_a?(::Hash)
+          
+          if original_option = options[:if]
+            options[:if] = Proc.new { |record|
               @scenario.in_scenario? &&
                 ActiveSupport::Callbacks::Callback.new(:kind, :method).__send__(:evaluate_method, original_option, record)
             }
           else
-            options[expression] = Proc.new { @scenario.in_scenario? }
+            options[:if] = Proc.new { @scenario.in_scenario? }
           end
+          args
         end
     end    
   end
