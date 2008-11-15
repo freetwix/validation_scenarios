@@ -16,8 +16,8 @@ module ValidationScenarios
     # Any validates_xxx defined in the Event for the scenario :reviewer will be activated, all other
     # validations are still working. 
     #
-    def with_scenario(args, &block)
-      Thread.current[:validation_scenarios_with_scenario] = Scenario.new(args)
+    def with_scenario(name, &blk)
+      Thread.current[:validation_scenarios_with_scenario] = Scenario.new(name)
       yield
     ensure
       Thread.current[:validation_scenarios_with_scenario] = nil

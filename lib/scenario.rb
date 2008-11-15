@@ -2,18 +2,12 @@ module ValidationScenarios
   class Scenario
     attr_reader :name
 
-    def initialize(*args)
-      @name = args.first.to_sym
-      @options = args.last.is_a?(Hash) ? args.pop : {}
+    def initialize(name)
+      @name = name
     end
 
-    def [](key)
-      @options[key]
-    end
-
-    def ==(another)
-      return false if another.nil?
-      @name == another.name
+    def ==(scenario)
+      @name == scenario.name rescue false
     end
 
     def in_scenario?

@@ -2,10 +2,10 @@ require 'scenario'
 require 'active_record_support'
 require 'with'
 
-ActiveRecord::Base.class_eval do
+class ActiveRecord::Base
   include ValidationScenarios::ActiveRecordSupport
 end
 
-ActionController::Base.class_eval do
+class ActionController::Base
   include ValidationScenarios::With
 end

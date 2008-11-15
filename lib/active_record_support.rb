@@ -1,10 +1,8 @@
 module ValidationScenarios
   module ActiveRecordSupport
-
     def self.included(base)
       base.extend(ClassMethods)
     end
-    
     module ClassMethods
       ##
       # Define validates_xxx methods on a Model for scenarios. The validation will only occur, if the
@@ -14,8 +12,8 @@ module ValidationScenarios
       #     class Event < ActiveRecord::Base
       #       validates_presence_of :title
       #
-      #       in_scenario :reviewer do |s|
-      #         s.validates_presence_of :reviewer_note
+      #       in_scenario :reviewer do |me|
+      #         me.validates_presence_of :reviewer_note
       #       end
       #
       #   Controller:
@@ -43,67 +41,67 @@ module ValidationScenarios
       #
       #       validates_presence_of :description, :unless => Proc.new { in_scenarios? :bulk_insert, :reviewer }
       #
-      #       in_scenario :reviewer do |s|
-      #         s.validates_presence_of :reviewer_note
+      #       in_scenario :reviewer do |me|
+      #         me.validates_presence_of :reviewer_note
       #       end
       #
       # You may have noticed the #in_scenarios? method, which can be used for multiple assignments of
       # scenarios.
       # 
-      def in_scenario(*args)
-        yield(Proxy.new(self, ValidationScenarios::Scenario.new(*args)))
+      def in_scenario(name, &blk)
+        yield(ValidatesBlenderProxy.new(self, name))
       end
-      
+    
       ##
       # Use in validates_xxx :unless option Procs to disable a default validation in a certain scenario
       #
-      def in_scenario?(scenario)
-        Scenario.new(scenario).in_scenario?
+      def in_scenario?(name)
+        Scenario.new(name).in_scenario?
       end
 
       ##
       # Use in validates_xxx :unless option Procs to disable a default validation for some scenarios
       #
-      def in_scenarios?(*scenarios)
-        scenarios.find { |scenario| in_scenario?(scenario) } 
+      def in_scenarios?(*names)
+        names.find { |name| in_scenario?(name) } 
       end
     end
-    
-    ##
-    # proxy for the underlying active_record object (here: event) if using validates_xxx methods in the
-    # context of an #in_scenario block
-    #
-    class Proxy < BlankSlate #:doc:
+  end
+  
+  
+  # proxy for the underlying active_record object (here: event) if using validates_xxx methods in the
+  # context of an #in_scenario block
+  class ValidatesBlenderProxy < BlankSlate #:nodoc:
 
-      def initialize(model_clazz, scenario)
-        @model_clazz = model_clazz
-        @scenario    = scenario
-      end
+    def initialize(model_clazz, scenario_name)
+      @model_clazz = model_clazz
+      @scenario    = ValidationScenarios::Scenario.new(scenario_name)
+    end
 
-      def method_missing(m, *args, &block)
-        args = __blend__(*args) if m.to_s =~ /validates_*/
-        @model_clazz.__send__(m, *args, &block)
-      end
+    def method_missing(m, *args, &block)
+      args = __blend__(*args) if m.to_s =~ /validates_*/
+      @model_clazz.__send__(m, *args, &block)
+    end
 
-      private
+    private
 
-        ##
-        # this relies heavy on the internals of rails, cause validation macros are stored via callbacks
-        # and i did not find a better solution
-        def __blend__(*args) #:doc:
-          options = args.last
-          options = args.push({}).last unless options.is_a?(::Hash)
-          
-          if original_option = options[:if]
-            options[:if] = Proc.new { |record|
-              @scenario.in_scenario? &&
-                ActiveSupport::Callbacks::Callback.new(:kind, :method).__send__(:evaluate_method, original_option, record)
-            }
-          else
-            options[:if] = Proc.new { @scenario.in_scenario? }
-          end
-          args
+      # this relies heavy on the internals of rails, cause validation macros are stored via callbacks
+      # and i did not want to duplicate logic
+      def __blend__(*args) #:nodoc:
+        options = args.last
+        options = args.push({}).last unless options.is_a?(::Hash)
+        
+        if original_if_option = options[:if]
+          options[:if] = Proc.new { |record|
+            @scenario.in_scenario? &&
+              # :kind and :method fakes to initialize properly
+              ActiveSupport::Callbacks::Callback.new(:kind, :method).
+                  __send__(:evaluate_method, original_if_option, record)
+          }
+        else
+          options[:if] = Proc.new { @scenario.in_scenario? }
         end
-    end    
+        args
+      end
   end
 end
