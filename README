@@ -1,7 +1,6 @@
 = Validation Scenarios
 
-This plugin is based on ideas of the http://code.google.com/p/validation-scenarios/ plugin. The name does fit for the problem which is solved with the plugin, so i'm to lazy to find another one (just rubified it and asking for re-usage of the name).
-
+Define Validations on an ActiveRecord Model for special scenarios or exclude main Validations when in a scenario.
 
 = Howto
 
@@ -48,6 +47,9 @@ code:
 You may have noticed the #in_scenarios? method, which can be used for multiple assignments of
 scenarios.
 
+= Notes
+
+This plugin reuses the name and some ideas of the http://code.google.com/p/validation-scenarios/ plugin, cause i was to lazy to find another name (just rubified it and asking for re-usage of the name).
 
 = Rails Support
 
@@ -60,8 +62,8 @@ The tests are running with the following Rails versions:
 
 MIT-License, see MIT-LICENSE file
 
-much fun with the plugin, any suggestions to:
-freetwix at web dot de
+
+much fun with the plugin, love and peace for the world :D
+any suggestions to: freetwix at web dot de
 
 thx
-
