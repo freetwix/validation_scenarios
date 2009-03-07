@@ -54,7 +54,7 @@ This plugin reuses the name and some ideas of the http://code.google.com/p/valid
 = Rails Support
 
 The tests are running with the following Rails versions:
-* 2.3.0 (edge)
+* v2.3.1 (seems to be something like 2.3 RC2)
 * 2.2
 * 2.1
 
