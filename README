@@ -77,6 +77,22 @@ express this like:
 This is even more handy when the attribute update is more coupled to the current state of the model 
 object.
 
+
+More nifty stuff for the model (if you're not a block fan):
+
+  Controller:
+    class ReviewController < ApplicationController
+      
+      def update
+        @event.save_in_scenario(:reviewer)
+      end
+      
+      def create
+        @event.save_in_scenario!(:admin)
+      end
+
+thx to theflow for this nice idea.
+
 = Notes
 
 This plugin reuses the name and some ideas of the http://code.google.com/p/validation-scenarios/ plugin, cause i was to lazy to find another name (just rubified it and asking for re-usage of the name).
