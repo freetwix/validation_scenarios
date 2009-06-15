@@ -3,5 +3,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string "title"
     t.string "comment"
     t.text   "description"
+    t.string "short_description"
   end
 end

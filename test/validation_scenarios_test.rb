@@ -1,11 +1,16 @@
 require File.dirname(__FILE__) +  '/test_helper'
 
+
+# see db/schema.rb for 'events' attributes
 class Event < ActiveRecord::Base
   attr_accessor :bar, :foo, :dude
   
   validates_presence_of :title, :unless => Proc.new { in_scenario? :disable_title }
 
   validates_presence_of :comment, :unless => Proc.new { in_scenarios? :disable_title, :more_disable_title }
+  
+  # instance based scenario validation
+  validates_presence_of :short_description, :if => Proc.new { |e| e.in_scenario? :short_required }
   
   in_scenario :description_required do |me|
     me.validates_length_of :description, :in => 10..2000
@@ -28,13 +33,8 @@ class Event < ActiveRecord::Base
   end
 end
 
-class Foo
-  include ValidationScenarios::With
-end
 
-
-describe "Model with scenarios and an validation with no :if option" do
-
+describe "Model with scenarios and an validation with no :if option" do  
   before do
     @valid_event = create_valid_event
     @foo = Foo.new
@@ -85,7 +85,6 @@ end
 
 
 describe "Model in a scenario and a validation  on description without any further options" do
-
   before do
     @valid_event = create_valid_event
     @foo = Foo.new
@@ -108,7 +107,6 @@ end
 
 
 describe "Model with scenarios and an validation with :if option as a proc" do
-
   before do
     @valid_event = create_valid_event
     @foo = Foo.new
@@ -133,7 +131,6 @@ end
 
 
 describe "Model with scenarios and an validation with :if option as a symbol" do
-  
   before do
     @valid_event = create_valid_event
     @foo = Foo.new
@@ -158,7 +155,6 @@ end
 
 
 describe "Model with scenarios and an validation with :if option as a string" do
-  
   before do
     @valid_event = create_valid_event
     @foo = Foo.new
@@ -183,7 +179,6 @@ end
 
 
 describe "Model with scenarios and an validation skipping in a scenario" do
-  
   before do
     @event = Event.new()
     @foo = Foo.new
@@ -202,7 +197,6 @@ end
 
 
 describe "Model with scenarios and an validation skipping in some scenarios" do
-  
   before do
     @event = Event.new()
     @foo = Foo.new
@@ -226,9 +220,24 @@ describe "Model with scenarios and an validation skipping in some scenarios" do
   end
 end
 
-private
 
-  def create_valid_event
-    Event.new(:title => 'title', :comment => 'dude')  
+describe "Model with instance-based scenario validation" do
+  before do
+    @event = create_valid_event
+    @foo = Foo.new
   end
   
+  it "should not be valid without 'short_description' in scenario :short_required" do
+    @foo.with_scenario :short_required do
+      @event.should.not.be.valid
+    end
+  end
+
+  it "should be valid without 'short_description' in scenario :short_required" do
+    @event.short_description = 'dude'
+    
+    @foo.with_scenario :short_required do
+      @event.should.be.valid
+    end
+  end
+end

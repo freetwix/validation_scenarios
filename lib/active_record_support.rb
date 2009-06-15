@@ -1,69 +1,40 @@
 module ValidationScenarios
   module ActiveRecordSupport
     def self.included(base)
-      base.extend(ClassMethods)
+      base.class_eval <<-IN_THE_EVAL
+        extend ClassMethods
+        extend Methods
+        include Methods
+      IN_THE_EVAL
     end
+    
     module ClassMethods
       ##
-      # Define validates_xxx methods on a Model for scenarios. The validation will only occur, if the
-      # Model is used in a scenario:
-      #
-      #   Model:
-      #     class Event < ActiveRecord::Base
-      #       validates_presence_of :title
-      #
-      #       in_scenario :reviewer do |me|
-      #         me.validates_presence_of :reviewer_note
-      #       end
-      #
-      #   Controller:
-      #     class ReviewController < ApplicationController
-      #       def create
-      #         @event = Event.new(params[:event])
-      #         @event.save!
-      #       end
-      #
-      #       def update
-      #         with_scenario :reviewer do
-      #           @event.save!
-      #         end
-      #       end
-      #
-      # The :symbol given to #in_scenario is the identifier for the scenario, which is then activated
-      # via the #with_scenario block.
-      #
-      # If you want to exclude a default validation within a scenario, you may do so with the following
-      # code:
-      #
-      #   Model:
-      #     class Event < ActiveRecord::Base
-      #       validates_uniqueness_of :title, :unless => Proc.new { in_scenario? :bulk_insert }
-      #
-      #       validates_presence_of :description, :unless => Proc.new { in_scenarios? :bulk_insert, :reviewer }
-      #
-      #       in_scenario :reviewer do |me|
-      #         me.validates_presence_of :reviewer_note
-      #       end
-      #
-      # You may have noticed the #in_scenarios? method, which can be used for multiple assignments of
-      # scenarios.
+      # Use around any validates_xxx
       # 
       def in_scenario(name, &blk)
         yield(ValidatesBlenderProxy.new(self, name))
       end
+    end
     
+    module Methods
       ##
-      # Use in validates_xxx :unless option Procs to disable a default validation in a certain scenario
+      # Use on any instance for scenario-based execution.
+      #
+      # Use in validates_xxx options (:unless, :if) Procs for validation with a scenario
       #
       def in_scenario?(name)
         Scenario.new(name).in_scenario?
       end
 
       ##
-      # Use in validates_xxx :unless option Procs to disable a default validation for some scenarios
+      # Use on any instance for scenarios-based execution.
+      #
+      # Use in validates_xxx options (:unless, :if) Procs for validation with scenarios (evaluates if 
+      # any matches)
       #
       def in_scenarios?(*names)
-        names.find { |name| in_scenario?(name) } 
+        names.any? { |name| in_scenario?(name) } 
       end
     end
   end

@@ -11,7 +11,7 @@ if File.exist?(RAILS_EDGE_PATH)
     $LOAD_PATH.unshift libdir
   end  
 else
-  RAILS_GEM_VERSION = ENV['RAILS_GEM_VERSION'] || '2.1.1'
+  RAILS_GEM_VERSION = ENV['RAILS_GEM_VERSION'] || '2.3.2'
   gem 'rails', RAILS_GEM_VERSION  
 end
 
@@ -40,3 +40,13 @@ ActiveRecord::Schema.verbose = false
 require File.dirname(__FILE__) + "/db/schema.rb"
 
 require "#{File.dirname(__FILE__)}/../init"
+
+
+# helper methods and classes
+def create_valid_event
+  Event.new(:title => 'title', :comment => 'dude')  
+end
+
+class Foo
+  include ValidationScenarios::With
+end

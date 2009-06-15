@@ -1,13 +1,7 @@
 require File.dirname(__FILE__) +  '/test_helper'
 
 
-class Foo
-  include ValidationScenarios::With
-end
-
-
 describe "Scenario#==" do
-  
   it "should return false comparing a scenario with another by name" do
     dude = ValidationScenarios::Scenario.new(:dude)
     foo = ValidationScenarios::Scenario.new(:foo)
@@ -31,7 +25,6 @@ end
 
 
 describe "Scenario#in_scenario?" do
-  
   it "should return true if in scenario" do
     dude = ValidationScenarios::Scenario.new(:dude)
     

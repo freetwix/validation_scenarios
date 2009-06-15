@@ -1,3 +1,6 @@
+= NOTE
+  Will change name soon, will be 'scenarios' only (see new usage below).
+
 = Validation Scenarios
 
 Define Validations on an ActiveRecord Model for special scenarios or exclude main Validations when in a scenario.
@@ -47,6 +50,33 @@ code:
 You may have noticed the #in_scenarios? method, which can be used for multiple assignments of
 scenarios.
 
+
+Another use of scenarios in state machines will give you a clean implementation of scenario based
+transitions. 
+If in the above reviewer scenario only a state transition should be allowed as reviewer(using
+the awesome state_machine plugin http://github.com/pluginaweek/state_machine), it is possible to 
+express this like:
+
+  Model:
+     class Event < ActiveRecord::Base
+       event :review do
+         transition :open => :reviewed, :if => lambda { |event| event.in_scenario?(:reviewer) }
+       end
+       state :open
+       state :reviewed
+  
+   Controller:
+     class ReviewController < ApplicationController
+  
+       def update
+         with_scenario :reviewer do
+           @event.review!
+         end
+       end 
+
+This is even more handy when the attribute update is more coupled to the current state of the model 
+object.
+
 = Notes
 
 This plugin reuses the name and some ideas of the http://code.google.com/p/validation-scenarios/ plugin, cause i was to lazy to find another name (just rubified it and asking for re-usage of the name).
@@ -54,7 +84,8 @@ This plugin reuses the name and some ideas of the http://code.google.com/p/valid
 = Rails Support
 
 The tests are running with the following Rails versions:
-* v2.3.1 (seems to be something like 2.3 RC2)
+* 2.3.2
+* 2.3.1
 * 2.2
 * 2.1
 
