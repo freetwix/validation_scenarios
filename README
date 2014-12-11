@@ -1,6 +1,3 @@
-= NOTE
-  Will change name soon, will be 'scenarios' only (see new usage below).
-
 = Validation Scenarios
 
 Define Validations on an ActiveRecord Model for special scenarios or exclude main Validations when in a scenario.
